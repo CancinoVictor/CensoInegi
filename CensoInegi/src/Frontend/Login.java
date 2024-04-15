@@ -10,37 +10,59 @@ import javax.swing.*;
 
 public class Login extends JFrame implements ActionListener {
 
-    // Componentes del formulario
     private JLabel labelUsername, labelPassword;
     private JTextField textUsername;
     private JPasswordField textPassword;
     private JButton buttonLogin;
 
     public Login() {
-        // Configuración del formulario
         setTitle("Censo de Poblacion Inegi");
-        setSize(300, 150);
+        setSize(300, 200);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new GridLayout(4, 1));
+        getContentPane().setBackground(new Color(240, 240, 240));
 
-        // Componentes
-        labelUsername = new JLabel("Username:");
-        labelPassword = new JLabel("Password:");
-        textUsername = new JTextField(20);
-        textPassword = new JPasswordField(20);
-        buttonLogin = new JButton("Login");
+        labelUsername = new JLabel("Usuario:", SwingConstants.CENTER);
+        //labelUsername.setIcon(new ImageIcon(getClass().getResource("/resources/user_icon.png")));
+        labelUsername.setFont(new Font("Arial", Font.BOLD, 14));
+        labelUsername.setForeground(new Color(50, 50, 50));
 
-        // Layout
-        setLayout(new GridLayout(3, 2));
-        add(labelUsername);
-        add(textUsername);
-        add(labelPassword);
-        add(textPassword);
-        add(new JLabel()); // Espacio vacío
-        add(buttonLogin);
+        textUsername = new JTextField(15);
+        textUsername.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        // Escuchar eventos del botón
+        JPanel panelUsername = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelUsername.setBackground(new Color(240, 240, 240));
+        panelUsername.add(labelUsername);
+        panelUsername.add(textUsername);
+
+        labelPassword = new JLabel("Contraseña:", SwingConstants.CENTER);
+        //labelPassword.setIcon(new ImageIcon(getClass().getResource("/resources/password_icon.png")));
+        labelPassword.setFont(new Font("Arial", Font.BOLD, 14));
+        labelPassword.setForeground(new Color(50, 50, 50));
+
+        textPassword = new JPasswordField(15);
+        textPassword.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        JPanel panelPassword = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelPassword.setBackground(new Color(240, 240, 240));
+        panelPassword.add(labelPassword);
+        panelPassword.add(textPassword);
+
+        buttonLogin = new JButton("Iniciar sesión");
         buttonLogin.addActionListener(this);
+        buttonLogin.setFont(new Font("Arial", Font.BOLD, 14));
+        buttonLogin.setBackground(new Color(50, 150, 250));
+        buttonLogin.setForeground(Color.WHITE);
+        buttonLogin.setFocusPainted(false);
+
+        JPanel panelButton = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelButton.setBackground(new Color(240, 240, 240));
+        panelButton.add(buttonLogin);
+
+        add(panelUsername);
+        add(panelPassword);
+        add(panelButton);
     }
 
     // Manejo del evento de clic en el botón
@@ -61,9 +83,24 @@ public class Login extends JFrame implements ActionListener {
             ResultSet resultado = statement.executeQuery();
 
             if (resultado.next()) {
-                // Usuario autenticado
-                JOptionPane.showMessageDialog(this, "¡Inicio de sesión exitoso!");
-                // Aquí podrías redirigir a otra ventana o realizar alguna acción adicional
+                // Obtener el rol del usuario desde el ResultSet
+                String rol = resultado.getString("rol");
+
+                // Redireccionar según el rol del usuario
+                if ("admin".equals(rol)) {
+                    // Abrir el formulario MenuAdmin
+                    //MenuAdmin menuAdmin = new MenuAdmin();
+                    //menuAdmin.setVisible(true);
+                    this.dispose();
+                } else if ("cliente".equals(rol)) {
+                    // Abrir el formulario HabitantesForm
+                    HabitantesForm habitantesForm = new HabitantesForm();
+                    habitantesForm.setVisible(true);
+                    this.dispose();
+                } else {
+                    // Rol desconocido
+                    JOptionPane.showMessageDialog(this, "Rol de usuario desconocido");
+                }
             } else {
                 // Credenciales incorrectas
                 JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos");

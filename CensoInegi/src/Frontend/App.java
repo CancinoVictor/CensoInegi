@@ -7,7 +7,7 @@ package Frontend;
 
 /**
  *
- * @author Cancino
+ * @author Cancino44
  */
 public class App {
 

@@ -1,31 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Frontend;
 
-/**
- *
- * @author Cancino
- */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import Backend.ConexionMySQL; // Importar la clase de conexión
 
 public class HabitantesForm extends JFrame {
     // Componentes del formulario
     private JTextField txtINE, txtNombre, txtApellido, txtTelefono;
-    private JComboBox<String> cmbVivienda;
+    private JComboBox<String> cmbTipoVivienda; // ComboBox para los tipos de vivienda
     private JButton btnGuardar, btnEliminar;
     private JTextArea txtAreaHabitantes;
 
-    // Variables de conexión a la base de datos
+    // Objeto de conexión a la base de datos
     private Connection conn;
-    private Statement stmt;
-    private ResultSet rs;
-
+    
     public HabitantesForm() {
         // Configuración del formulario
         setTitle("Gestión de Habitantes");
@@ -33,18 +23,33 @@ public class HabitantesForm extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Componentes
+        // Componentes del formulario
         txtINE = new JTextField(10);
         txtNombre = new JTextField(10);
         txtApellido = new JTextField(10);
         txtTelefono = new JTextField(10);
-        cmbVivienda = new JComboBox<>();
+        cmbTipoVivienda = new JComboBox<>(); // ComboBox para los tipos de vivienda
         btnGuardar = new JButton("Guardar");
         btnEliminar = new JButton("Eliminar");
         txtAreaHabitantes = new JTextArea(10, 30);
         JScrollPane scrollPane = new JScrollPane(txtAreaHabitantes);
 
-        // Layout
+        // Llenar ComboBox con los tipos de vivienda
+        String[] tiposVivienda = {
+            "Vivienda de concreto",
+            "Vivienda de adobe(antiguo)",
+            "Vivienda de ladrillo",
+            "Vivienda de madera",
+            "Vivienda de cartón",
+            "Casa de piedra",
+            "Vivienda prefabricada",
+            "Material Ecológico",
+            "Casa de paja, ramas o caña",
+            "Material Adobe Moderno"
+        };
+        cmbTipoVivienda.setModel(new DefaultComboBoxModel<>(tiposVivienda));
+
+        // Layout del formulario
         JPanel panelFormulario = new JPanel(new GridLayout(5, 2));
         panelFormulario.add(new JLabel("INE:"));
         panelFormulario.add(txtINE);
@@ -54,8 +59,8 @@ public class HabitantesForm extends JFrame {
         panelFormulario.add(txtApellido);
         panelFormulario.add(new JLabel("Teléfono:"));
         panelFormulario.add(txtTelefono);
-        panelFormulario.add(new JLabel("Vivienda:"));
-        panelFormulario.add(cmbVivienda);
+        panelFormulario.add(new JLabel("Tipo de vivienda:")); // Texto para el ComboBox
+        panelFormulario.add(cmbTipoVivienda); // ComboBox para los tipos de vivienda
 
         JPanel panelBotones = new JPanel(new FlowLayout());
         panelBotones.add(btnGuardar);
@@ -68,16 +73,9 @@ public class HabitantesForm extends JFrame {
 
         setContentPane(panelPrincipal);
 
-        // Conexión a la base de datos
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/nombre_base_datos", "usuario", "contraseña");
-            cargarViviendas();
-            cargarHabitantes();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
+        // Crear instancia de la conexión a la base de datos
+        conn = ConexionMySQL.obtenerInstancia().obtenerConexion();
+
         // Escuchar eventos de los botones
         btnGuardar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -90,31 +88,21 @@ public class HabitantesForm extends JFrame {
                 eliminarHabitante();
             }
         });
-    }
 
-    // Método para cargar las viviendas en el ComboBox
-    private void cargarViviendas() {
-        try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT ID_VIVIENDA FROM VIVIENDA");
-            while (rs.next()) {
-                cmbVivienda.addItem(rs.getString("ID_VIVIENDA"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Cargar habitantes al iniciar la aplicación
+        cargarHabitantes();
     }
 
     // Método para cargar los habitantes en el área de texto
     private void cargarHabitantes() {
         try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM HABITANTES");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM HABITANTES");
             StringBuilder habitantes = new StringBuilder();
             while (rs.next()) {
                 habitantes.append("INE: ").append(rs.getString("INE")).append(", Nombre: ").append(rs.getString("NOMBRE"))
                         .append(", Apellido: ").append(rs.getString("APELLIDO")).append(", Teléfono: ").append(rs.getInt("TELEFONO"))
-                        .append(", Vivienda: ").append(rs.getInt("ID_VIVIENDA")).append("\n");
+                        .append(", Tipo de vivienda: ").append(rs.getString("TIPO_VIVIENDA")).append("\n");
             }
             txtAreaHabitantes.setText(habitantes.toString());
         } catch (SQLException e) {
@@ -129,14 +117,15 @@ public class HabitantesForm extends JFrame {
             String nombre = txtNombre.getText();
             String apellido = txtApellido.getText();
             int telefono = Integer.parseInt(txtTelefono.getText());
-            int idVivienda = Integer.parseInt((String) cmbVivienda.getSelectedItem());
+            String tipoVivienda = (String) cmbTipoVivienda.getSelectedItem(); // Obtener el tipo de vivienda seleccionado
             
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO HABITANTES (INE, ID_VIVIENDA, NOMBRE, APELLIDO, TELEFONO) VALUES (?, ?, ?, ?, ?)");
+            // Insertar el habitante en la base de datos
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO HABITANTES (INE, NOMBRE, APELLIDO, TELEFONO, TIPO_VIVIENDA) VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, ine);
-            ps.setInt(2, idVivienda);
-            ps.setString(3, nombre);
-            ps.setString(4, apellido);
-            ps.setInt(5, telefono);
+            ps.setString(2, nombre);
+            ps.setString(3, apellido);
+            ps.setInt(4, telefono);
+            ps.setString(5, tipoVivienda);
             ps.executeUpdate();
             
             JOptionPane.showMessageDialog(this, "Habitante guardado correctamente");
@@ -166,13 +155,5 @@ public class HabitantesForm extends JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error al eliminar el habitante");
         }
-    }
-
-    // Método principal para ejecutar la aplicación
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            HabitantesForm form = new HabitantesForm();
-            form.setVisible(true);
-        });
-    }
+    }   
 }
