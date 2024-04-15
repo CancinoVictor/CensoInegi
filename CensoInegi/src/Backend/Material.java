@@ -6,7 +6,7 @@ package Backend;
  * @author Cecyl 
  */
 public class Material {
-    private int idMaterial;
+    private int idMaterial; 
     private String material;
 
     public Material(int idMaterial, String material) {

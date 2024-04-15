@@ -7,7 +7,7 @@ package Backend;
  */
 public class Localidad extends Municipio{
     private int idLocalidad;
-    private String localidad;
+    private String localidad; 
 
     public Localidad(int idLocalidad, String localidad, int idMunicipio, String nombreMunicipio) {
         super(idMunicipio, nombreMunicipio);

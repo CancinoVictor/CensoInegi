@@ -7,7 +7,7 @@ package Backend;
  */
 public class Sustento {
     private int idSustento;
-    private Vivienda vivienda;
+    private Vivienda vivienda; 
     private String sustento;
 
     public Sustento(int idSustento, Vivienda vivienda, String sustento) {

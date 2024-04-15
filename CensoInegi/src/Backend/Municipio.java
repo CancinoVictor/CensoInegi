@@ -6,7 +6,7 @@ package Backend;
  * @author Cecyl
  */
 public class Municipio {
-    private int idMunicipio;
+    private int idMunicipio; 
     private String nombreMunicipio;
 
     public Municipio(int idMunicipio, String nombreMunicipio) {

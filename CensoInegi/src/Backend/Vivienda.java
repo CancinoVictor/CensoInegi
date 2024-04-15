@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class Vivienda {
     private int idVivienda;
-    private Localidad localidad;
+    private Localidad localidad; 
     private Material material;
     private String attributePisos;
     private List<Habitante> habitantes;
