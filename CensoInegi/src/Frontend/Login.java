@@ -1,15 +1,15 @@
 package Frontend;
 
-/**
- *
- * @author Cancino
- */
-
-import javax.swing.*;
+import Backend.ConexionMySQL;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.*;
 
 public class Login extends JFrame implements ActionListener {
+
     // Componentes del formulario
     private JLabel labelUsername, labelPassword;
     private JTextField textUsername;
@@ -48,17 +48,29 @@ public class Login extends JFrame implements ActionListener {
         String username = textUsername.getText();
         String password = new String(textPassword.getPassword());
 
-        // Verificación de credenciales (aquí deberías tener tu lógica de autenticación)
-        if (username.equals("usuario") && password.equals("contraseña")) {
-            JOptionPane.showMessageDialog(this, "¡Inicio de sesión exitoso!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos");
-        }
-    }
+        // Validación de credenciales consultando la base de datos
+        ConexionMySQL conexionMySQL = ConexionMySQL.obtenerInstancia();
+        Connection conexion = conexionMySQL.obtenerConexion();
 
-    // Método principal para ejecutar la aplicación
-    public static void main(String[] args) {
-        Login form = new Login();
-        form.setVisible(true);
+        try {
+            // Consulta SQL para verificar las credenciales del usuario
+            String consulta = "SELECT * FROM usuarios WHERE nombre = ? AND contraseña = ?";
+            PreparedStatement statement = conexion.prepareStatement(consulta);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            ResultSet resultado = statement.executeQuery();
+
+            if (resultado.next()) {
+                // Usuario autenticado
+                JOptionPane.showMessageDialog(this, "¡Inicio de sesión exitoso!");
+                // Aquí podrías redirigir a otra ventana o realizar alguna acción adicional
+            } else {
+                // Credenciales incorrectas
+                JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos");
+            }
+        } catch (Exception ex) {
+            // Error al ejecutar la consulta
+            JOptionPane.showMessageDialog(this, "Error al verificar las credenciales: " + ex.getMessage());
+        }
     }
 }

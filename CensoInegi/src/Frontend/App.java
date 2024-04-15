@@ -9,13 +9,13 @@ package Frontend;
  *
  * @author Cancino
  */
-public class Main {
+public class App {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
+        // Crear una instancia de la ventana de inicio de sesión (Login)
+        Login loginForm = new Login();
+        // Mostrar la ventana de inicio de sesión
+        loginForm.setVisible(true);
     }
-    
+
 }
