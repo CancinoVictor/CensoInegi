@@ -1,13 +1,10 @@
-
 package Frontend;
 
-/**
- *
- * @author Cecyl 
- */
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+
+import Backend.ConexionMySQL;
 
 public class ConsultaCantidadHabitantesPorMaterialFrame extends JFrame {
 
@@ -36,8 +33,8 @@ public class ConsultaCantidadHabitantesPorMaterialFrame extends JFrame {
 
     private void mostrarDatos() {
         try {
-            // Conexión a la base de datos
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/nombre_base_datos", "usuario", "contraseña");
+            // Obtener la conexión desde la clase ConexionMySQL
+            Connection con = ConexionMySQL.obtenerInstancia().obtenerConexion();
 
             // Consulta SQL para obtener la cantidad de habitantes por tipo de vivienda
             String consulta = "SELECT MATERIAL.MATERIAL, COUNT(HABITANTES.ID_VIVIENDA) AS cantidad_habitantes "
@@ -61,8 +58,8 @@ public class ConsultaCantidadHabitantesPorMaterialFrame extends JFrame {
                 ((DefaultTableModel) table.getModel()).addRow(row);
             }
 
-            // Cerrar conexión
-            con.close();
+            // Cerrar conexión - Esto ya no es necesario porque la conexión se gestiona internamente en ConexionMySQL
+            // con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

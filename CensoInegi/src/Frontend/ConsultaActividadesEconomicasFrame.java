@@ -1,14 +1,9 @@
-
 package Frontend;
 
+import Backend.ConexionMySQL;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
-
-/**
- *
- * @author Cecyl 
- */
 
 public class ConsultaActividadesEconomicasFrame extends JFrame {
 
@@ -37,8 +32,8 @@ public class ConsultaActividadesEconomicasFrame extends JFrame {
 
     private void mostrarDatos() {
         try {
-            // Conexión a la base de datos
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/nombre_base_datos", "usuario", "contraseña");
+            // Obtener la conexión desde la clase de conexión MySQL
+            Connection con = ConexionMySQL.obtenerInstancia().obtenerConexion();
 
             // Consulta SQL para obtener las actividades económicas por vivienda
             String consulta = "SELECT SUSTENTO.ID_VIVIENDA, GROUP_CONCAT(SUSTENTO.SUSTENTO SEPARATOR ', ') AS actividades "

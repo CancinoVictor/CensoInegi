@@ -1,44 +1,49 @@
-
-package Frontend;
-
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.sql.*;
-/**
- *
- * @author Cecyl 
- */
+
+import Backend.ConexionMySQL;
 
 public class DashboardPoblacion extends JFrame {
+
+    private JTable table;
 
     public DashboardPoblacion() {
         setTitle("Dashboard de Población");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Conectar a la base de datos y obtener datos de población
-        String[][] datosPoblacion = obtenerDatosPoblacion();
+        // Crear modelo de tabla
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Entidad");
+        model.addColumn("Municipio");
+        model.addColumn("Localidad");
+        model.addColumn("Población");
 
-        // Crear tabla para mostrar los datos
-        String[] columnas = {"Entidad", "Municipio", "Localidad", "Población"};
-        JTable tablaPoblacion = new JTable(datosPoblacion, columnas);
+        // Crear tabla con el modelo
+        table = new JTable(model);
 
-        // Agregar la tabla a un JScrollPane
-        JScrollPane scrollPane = new JScrollPane(tablaPoblacion);
+        // Agregar tabla a un JScrollPane para hacerla desplazable
+        JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane);
+
+        // Obtener y mostrar los datos de la base de datos
+        mostrarDatos();
     }
 
-    private String[][] obtenerDatosPoblacion() {
-        // Declarar matriz para almacenar los datos
-        String[][] datosPoblacion = null;
-
+    private void mostrarDatos() {
         try {
-            // Conexión a la base de datos
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/nombre_base_datos", "usuario", "contraseña");
+            // Obtener la conexión desde la clase ConexionMySQL
+            Connection con = ConexionMySQL.obtenerInstancia().obtenerConexion();
 
-            // Consulta SQL para obtener los datos de población
-            String consulta = "SELECT ENTIDAD, MUNICIPIO, LOCALIDAD, COUNT(*) AS Población "
-                            + "FROM HABITANTES "
-                            + "GROUP BY ENTIDAD, MUNICIPIO, LOCALIDAD";
+            // Consulta SQL para obtener la población por entidad, municipio y localidad
+            String consulta = "SELECT MUNICIPIO.ATTRIBUTE_MUNICIPIO14 AS Entidad, MUNICIPIO.ATTRIBUTE_MUNICIPIO14 AS Municipio, LOCALIDAD.LOCALIDAD, COUNT(HABITANTES.INE) AS Población " +
+                  "FROM HABITANTES " +
+                  "INNER JOIN VIVIENDA ON HABITANTES.ID_VIVIENDA = VIVIENDA.ID_VIVIENDA " +
+                  "INNER JOIN LOCALIDAD ON VIVIENDA.ID_LOCALIDAD = LOCALIDAD.ID_LOCALIDAD " +
+                  "INNER JOIN MUNICIPIO ON LOCALIDAD.ID_MUNICIPIO = MUNICIPIO.ID_MUNICIPIO " +
+                  "GROUP BY MUNICIPIO.ATTRIBUTE_MUNICIPIO14, LOCALIDAD.LOCALIDAD";
+
 
             // Crear objeto Statement
             Statement stmt = con.createStatement();
@@ -46,22 +51,15 @@ public class DashboardPoblacion extends JFrame {
             // Ejecutar consulta
             ResultSet rs = stmt.executeQuery(consulta);
 
-            // Contar filas en el resultado
-            rs.last();
-            int filas = rs.getRow();
-            rs.beforeFirst();
-
-            // Inicializar matriz con el tamaño correcto
-            datosPoblacion = new String[filas][4];
-
-            // Iterar sobre los resultados y agregarlos a la matriz
-            int i = 0;
+            // Iterar sobre los resultados y agregarlos a la tabla
             while (rs.next()) {
-                datosPoblacion[i][0] = rs.getString("ENTIDAD");
-                datosPoblacion[i][1] = rs.getString("MUNICIPIO");
-                datosPoblacion[i][2] = rs.getString("LOCALIDAD");
-                datosPoblacion[i][3] = rs.getString("Población");
-                i++;
+                Object[] row = {
+                        rs.getString("ENTIDAD"),
+                        rs.getString("Municipio"),
+                        rs.getString("LOCALIDAD"),
+                        rs.getInt("Población")
+                };
+                ((DefaultTableModel) table.getModel()).addRow(row);
             }
 
             // Cerrar conexión
@@ -69,8 +67,6 @@ public class DashboardPoblacion extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return datosPoblacion;
     }
 
     public static void main(String[] args) {
