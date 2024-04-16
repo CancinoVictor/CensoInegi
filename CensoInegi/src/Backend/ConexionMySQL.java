@@ -6,8 +6,8 @@ import javax.swing.JOptionPane;
 
 public class ConexionMySQL {
 
-    private static final String USUARIO = "cancino"; // Usuario de la base de datos
-    private static final String CONTRASENA = "root"; // Contraseña de la base de datos
+    private static final String USUARIO = "root"; // Usuario de la base de datos
+    private static final String CONTRASENA = "YES"; // Contraseña de la base de datos
     private static final String BASE_DE_DATOS = "Censo"; // Nombre de la base de datos
     private static final String IP = "127.0.0.1"; // Dirección IP del servidor MySQL
     private static final String PUERTO = "3306"; // Puerto de conexión MySQL
