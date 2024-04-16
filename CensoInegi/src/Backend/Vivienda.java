@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  *
- * @author usuario hp
+ * @author Cecyl 
  */
 public class Vivienda extends Observable {
     private int idVivienda;
